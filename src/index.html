@@ -85,10 +85,11 @@
                       <div class="item-title-row">
                         <div class="item-title">
                           {{ section.runner.name }}
+                          <span class="from">({{ ::section.from }})</span>
                         </div>
                       </div>
                       <div class="item-subtitle">
-                        {{ ::section.length }}km (+{{ ::section.elevation_up }}m, -{{ ::section.elevation_down }}m)
+                        {{ ::section.length }}km / +{{ ::section.elevation_up }}m -{{ ::section.elevation_down }}m
                       </div>
                     </div>
                     <div class="item-right">
@@ -109,6 +110,11 @@
                         Štart: {{ section.expectedStart.format('HH:mm') }}
                       </span>
                     </div>
+                    <p
+                      ng-if="!section.time"
+                      class="expected-duration">
+                      / {{ section.expectedDuration }} min.
+                    </p>
                   </li>
                 </ul>
                 <!-- <div

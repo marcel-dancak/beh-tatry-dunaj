@@ -5,11 +5,19 @@
     .controller('AppController', AppController)
 
   function AppController($scope, $q, $http) {
-    //var SECTIONS_URL = 'https://api.myjson.com/bins/3w2k5';
-    var SECTIONS_URL = 'https://api.myjson.com/bins/3epk5';
+    // var SECTIONS_URL = 'https://api.myjson.com/bins/3w2k5';
+    // var SECTIONS_URL = 'https://api.myjson.com/bins/3epk5';
+    var SECTIONS_URL = 'data/sections_data.json';
+
+    var runners = {};
+    window.DATA.runners.forEach(function(runner) {
+      runners[runner.id] = runner;
+    });
+    $scope.runners = runners;
 
     $scope.loadState = function() {
       var startTime = localStorage.getItem('startTime');
+      // startTime = "09:00"
       if (startTime) {
         startTime = moment(startTime, "HH:mm");
       } else {
@@ -32,47 +40,9 @@
     }
     $scope.loadState();
 
-    function getRunners() {
-      if ($scope.runners) {
-        return $q.when($scope.runners);
-      }
-      var runners = {};
-      window.DATA.runners.forEach(function(runner) {
-        runners[runner.id] = runner;
-      });
-      // console.log(JSON.stringify(runners));
-      return $q.when(runners);
-
-      /*
-      var task = $q.defer();
-      $http.get(RUNNERS_URL).then(function(response) {
-        var runners = {};
-        response.data.forEach(function(runner) {
-          runners[runner.id] = runner;
-        });
-        task.resolve(runners);
-      });
-      return task.promise;
-      */
-    }
-
     function getSections() {
-      // if ($scope.sections) {
-      //   var json = JSON.stringify($scope.sections, function(key, value) {
-      //     if (key === 'expectedStart') {
-      //       return undefined;
-      //     }
-      //     if (key === 'runner') {
-      //       return value.id;
-      //     }
-      //     return value;
-      //   });
-      //   // console.log(json);
-      //   return $q.when(JSON.parse(json));
-      // }
       var task = $q.defer();
       $http.get(SECTIONS_URL).then(function(response) {
-      // $http.get('data/sections_data.json').then(function(response) {
         var sections = response.data.sections;
         // check/update startTime
         if (response.data.start) {
@@ -103,7 +73,11 @@
       var prevSection = {time: $scope.startTime.format("HH:mm:ss")};
       console.log('updateSectionsList: '+sections.length);
       sections.forEach(function(section) {
-        console.log(section.time);
+        // calculate expected run duration
+
+        var expectedDuration = section.k * (section.length/10) * section.runner.time_on_10km;
+        section.expectedDuration = expectedDuration.toFixed(2);
+
         if (section.time) {
           var start = moment(prevSection.time, "HH:mm:ss");
           var end = moment(section.time, "HH:mm:ss");
@@ -111,7 +85,7 @@
           section.duration = moment.duration(duration, "seconds").format("HH:mm:ss");
 
           // compare with expected duration
-          var expectedDurationInSeconds = 60 * ((section.length/10)*section.runner.time_on_10km);
+          var expectedDurationInSeconds = 60 * section.expectedDuration;
           var comparison = duration - expectedDurationInSeconds;
           section.comparison = (comparison >= 0? '+' : '-') + moment.duration(Math.abs(comparison), "seconds").format("mm:ss", {trim: false});
 
@@ -119,7 +93,6 @@
         } else if (!section.time && prevSection.time) {
           $scope.runningSectionId = section.id;
           var start = moment(prevSection.time, "HH:mm:ss");
-          // $scope.runningSectionTime = start.toNow(true);
           var elapsedMinutes = moment().diff(start, 'minutes');
           if (elapsedMinutes < 0) {
             start.subtract(1, 'day');
@@ -128,11 +101,7 @@
           $scope.runningSectionTime = prettyMinutes(elapsedMinutes);
           section.expectedStart = moment(prevSection.time, "HH:mm:ss");
         } else if (prevSection.expectedStart) {
-          var runnerExpectedTime = (prevSection.length/10)*prevSection.runner.time_on_10km;
-          runnerExpectedTime = parseInt(runnerExpectedTime);
-          console.log(section.id+': '+runnerExpectedTime+' / on 10km: '+prevSection.runner.time_on_10km);
-          console.log(prevSection.expectedStart.format('HH:mm')+' -> '+prevSection.expectedStart.clone().add(runnerExpectedTime, 'minute').format('HH:mm'));
-          section.expectedStart = prevSection.expectedStart.clone().add(runnerExpectedTime, 'minute');
+          section.expectedStart = prevSection.expectedStart.clone().add(prevSection.expectedDuration, 'minute');
         }
         prevSection = section;
       });
@@ -144,49 +113,45 @@
       console.log('fetchData');
       var task = $q.defer();
 
-      getRunners().then(function(runners) {
-        $scope.runners = runners;
+      getSections().then(function(sections) {
+        if ($scope.pendingOperations) {
+          console.log('Merge and Upload new sections');
+          console.log($scope.pendingOperations);
+          $scope.saveState();
 
-        getSections().then(function(sections) {
-          if ($scope.pendingOperations) {
-            console.log('Merge and Upload new sections');
-            console.log($scope.pendingOperations);
-            $scope.saveState();
-
-            for (var sectionId in $scope.pendingOperations) {
-              var section = sections[sectionId-1];
-              var diff = $scope.pendingOperations[sectionId];
-              for (var key in diff) {
-                section[key] = diff[key].new;
-              }
+          for (var sectionId in $scope.pendingOperations) {
+            var section = sections[sectionId-1];
+            var diff = $scope.pendingOperations[sectionId];
+            for (var key in diff) {
+              section[key] = diff[key].new;
             }
-            var json = JSON.stringify(sections, function(key, value) {
-              if (key === '' || key === 'id' || key === 'runner' || key === 'time' || Number.isInteger(parseInt(key))) {
-                return value;
-              }
-              return undefined;
-            });
-            var data = {
-              sections: JSON.parse(json),
-              start: $scope.startTime.format("HH:mm")
-            }
-            console.log(data);
-            $http.put(SECTIONS_URL, data).then(function() {
-              $scope.pendingOperations = {};
-              $scope.saveState();
-            });
           }
-
-          sections.forEach(function(section) {
-            section.runner = runners[section.runner];
+          var json = JSON.stringify(sections, function(key, value) {
+            if (key === '' || key === 'id' || key === 'runner' || key === 'time' || Number.isInteger(parseInt(key))) {
+              return value;
+            }
+            return undefined;
           });
-          $scope.updateSectionsList(sections);
+          var data = {
+            sections: JSON.parse(json),
+            start: $scope.startTime.format("HH:mm")
+          }
+          console.log(data);
+          $http.put(SECTIONS_URL, data).then(function() {
+            $scope.pendingOperations = {};
+            $scope.saveState();
+          });
+        }
 
-          $scope.sections = sections;
-          task.resolve();
+        sections.forEach(function(section) {
+          section.runner = $scope.runners[section.runner];
         });
+        $scope.updateSectionsList(sections);
 
+        $scope.sections = sections;
+        task.resolve();
       });
+
       return task.promise;
     };
 

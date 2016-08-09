@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html ng-app="MyApp">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <title>Od Tatier k Dunaju</title>
+    
+    <!-- Styles -->
+    <link href="http://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="bower_components/Framework7/dist/css/framework7.material.min.css">
+    <link rel="stylesheet" href="bower_components/Framework7/dist/css/framework7.material.colors.min.css">
+
+    <link rel="stylesheet" href="styles/app.css">
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+    <script type="text/javascript" src="bower_components/Framework7/dist/js/framework7.min.js"></script>
+    <script type="text/javascript" src="bower_components/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
+    <script type="text/javascript" src="js/data.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/service/InitService.js"></script>
+    <script type="text/javascript" src="js/controller/app.ctrl.js"></script>
+    <script type="text/javascript" src="js/controller/results.ctrl.js"></script>
+    <script type="text/javascript" src="js/controller/IndexPageController.js"></script>
+    <script type="text/javascript" src="js/controller/DetailPageController.js"></script>
+    
+  </head>
+  <body>
+    <div class="statusbar-overlay"></div>
+    <div class="panel-overlay"></div>
+    <div class="views">
+      <div class="view view-main" ng-controller="AppController">
+        
+        <!-- Pages -->
+        <div class="pages navbar-fixed">
+          
+          <!-- Page 1 -->
+          <div
+            class="page"
+            data-page="index"
+            ng-controller="IndexPageController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div
+                  class="center"
+                  ng-click="resetData()">
+                  Štart: {{ startTime.format("HH:mm") }}
+                </div>
+                <div class="right">
+                  <a href="#" class="open-panel link icon-only"
+                    ng-click="showResults()">
+                    <i class="icon icon-results"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div
+              class="index page-content pull-to-refresh-content"
+              xng-style="{overflow: showMore? 'auto' : 'hidden'}">
+              <!-- Default pull to refresh layer-->
+              <div class="pull-to-refresh-layer">
+                <div class="preloader"></div>
+                <div class="pull-to-refresh-arrow"></div>
+              </div>
+           
+              <!-- usual content below -->
+              <div class="list-block media-list sections">
+                <ul ng-cloak>
+                  <li
+                    ng-repeat="section in sections | limitTo: filter track by section.id"
+                    class="item-content car-{{ section.runner.car }}"
+                    ng-class="{active: runningSectionId === section.id}"
+                    ng-click="detailPage(section)"
+                    ng-disabled="section.time">
+                    <div class="item-section">
+                      {{ ::section.id }}
+                    </div>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div class="item-title">
+                          {{ section.runner.name }}
+                        </div>
+                      </div>
+                      <div class="item-subtitle">
+                        {{ ::section.length }}km (+{{ ::section.elevation_up }}m, -{{ ::section.elevation_down }}m)
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <span
+                        class="finish-time"
+                        ng-if="section.time">
+                        {{ section.time }}
+                      </span>
+                      <p
+                        class="running-time"
+                        ng-if="runningSectionId === section.id && !section.time">
+                        <span>Beží</span>
+                        <span>{{ runningSectionTime }}</span>
+                      </p>
+                      <span
+                        class="start-time"
+                        ng-if="section.expectedStart && runningSectionId !== section.id && !section.time">
+                        Štart: {{ section.expectedStart.format('HH:mm') }}
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+                <!-- <div
+                  class="show-more"
+                  ng-hide="showMore"
+                  ng-click="showMore = true">
+                  <span>Zobraziť viac</span>
+                </div> -->
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Page 2 -->
+          <div
+            class="page cached"
+            data-page="detail"
+            ng-controller="DetailPageController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a
+                    ng-click="back($event);$event.stopPropagation()"
+                    class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Úsek č.{{ detail.section.id }}</div>
+                <div class="right">
+                  <!-- <a href="#" class="open-panel link icon-only">
+                    <i class="icon icon-bars"></i>
+                  </a> -->
+                </div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div class="page-content">
+              <div class="list-block inputs-list">
+                <ul>
+
+                  <li>
+                    <div class="item-content">
+                      <div class="item-inner"> 
+                        <div class="item-title label">Bežec</div>
+                        <div class="item-input">
+                          <input
+                            type="number"
+                            min="1"
+                            max="12"
+                            placeholder="Číslo"
+                            ng-model="detail.runner.id"
+                            ng-change="loadRunnerProfile(detail.runner.id)"/>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li>
+                    <div class="item-content" xng-disabled="true">
+                      <div class="item-inner"> 
+                        <div class="item-title label">Čas na 10km</div>
+                        <div class="item-input">
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            placeholder="V minútach"
+                            ng-model="detail.runner.time_on_10km"/>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li>
+                    <div class="item-content">
+                      <div class="item-inner"> 
+                        <div class="item-title label">Čas v cieli</div>
+                        <div class="item-input">
+                          <input
+                            type="text"
+                            placeholder="HH:MM:SS"
+                            ng-model="detail.finish_time"/>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li>
+                    <div class="item-content">
+                      <div class="item-inner"> 
+                        <p>
+                          <a
+                            class="button button-raised"
+                            xclass="button button-raised button-fill color-blue"
+                            ng-click="detail.finish_time = getTime()">
+                            <i class="icon icon-stopwatch"></i>
+                            &nbsp Stop
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Page 3 -->
+          <div
+            class="page cached"
+            data-page="resultsPage"
+            ng-controller="ResultsController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a ng-click="back($event);$event.stopPropagation()" class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Výsledky</div>
+                <div class="right"></div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div class="page-content">
+              <div class="list-block media-list sections results">
+                <ul ng-cloak>
+                  <li
+                    ng-repeat="section in sections track by section.id"
+                    ng-if="section.time"
+                    class="item-content car-{{ ::section.runner.car }}"
+                    ng-click="detailPage(section)">
+                    <div class="item-section">
+                      {{ ::section.id }}
+                    </div>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div class="item-title">
+                          {{ ::section.runner.name }}
+                        </div>
+                      </div>
+                      <div class="item-subtitle">
+                        {{ ::section.length }}km (+{{ ::section.elevation_up }}m, -{{ ::section.elevation_down }}m)
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <p class="finish-time"><span>({{ section.time }})</span></p>
+                      <p class="duration-info">
+                        <!-- <label>Čas:</label> -->
+                        <span class="duration">{{ section.duration }}</span>
+                        <span
+                          class="comparison"
+                          ng-class="{negative: section.comparison[0] === '-'}">
+                          /{{ section.comparison }}
+                        </span>
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

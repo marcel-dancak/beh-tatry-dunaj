@@ -61,8 +61,7 @@
             </div>
             <!-- Page content-->
             <div
-              class="index page-content pull-to-refresh-content"
-              xng-style="{overflow: showMore? 'auto' : 'hidden'}">
+              class="index page-content pull-to-refresh-content">
               <!-- Default pull to refresh layer-->
               <div class="pull-to-refresh-layer">
                 <div class="preloader"></div>
@@ -116,6 +115,32 @@
                       / {{ section.expectedDuration }} min.
                     </p>
                   </li>
+
+                  <li
+                    ng-if="::sections"
+                    class="item-content finish"
+                    ng-class="{active: finishTime}">
+                    <img src="styles/tatry-dunaj.png" class="background"></img>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div></div>
+                        <div class="title">
+                          <span
+                            ng-if="!finishTime"
+                            class="expected-finish-time">
+                            Odhadovaný príchod: {{ expectedFinish.format('HH:mm') }}
+                          </span>
+                          <span
+                            ng-if="finishTime"
+                            class="final-finish-time">
+                            {{ finishTime.format('HH:mm:ss') }}
+                          </span>
+                        </div>
+                        <div></div>
+                      </div>
+                    </div>
+                  </li>
+
                 </ul>
                 <!-- <div
                   class="show-more"
@@ -153,67 +178,91 @@
             <!-- Page content-->
             <div class="page-content">
               <div class="list-block inputs-list">
+
                 <ul>
 
-                  <li>
+<!--                   <li class="label-item">
                     <div class="item-content">
                       <div class="item-inner"> 
                         <div class="item-title label">Bežec</div>
-                        <div class="item-input">
-                          <input
-                            type="number"
-                            min="1"
-                            max="12"
-                            placeholder="Číslo"
-                            ng-model="detail.runner.id"
-                            ng-change="loadRunnerProfile(detail.runner.id)"/>
-                        </div>
                       </div>
                     </div>
                   </li>
 
-                  <li>
-                    <div class="item-content" xng-disabled="true">
-                      <div class="item-inner"> 
-                        <div class="item-title label">Čas na 10km</div>
-                        <div class="item-input">
-                          <input
-                            type="number"
-                            min="1"
-                            max="100"
-                            placeholder="V minútach"
-                            ng-model="detail.runner.time_on_10km"/>
-                        </div>
-                      </div>
+                  <div class="card runner">
+                    <div class="card-header">
+                      <input type="text" placeholder="Zadaj meno" id="runner-autocomplete">
                     </div>
-                  </li>
-
-                  <li>
-                    <div class="item-content">
-                      <div class="item-inner"> 
-                        <div class="item-title label">Čas v cieli</div>
-                        <div class="item-input">
-                          <input
-                            type="text"
-                            placeholder="HH:MM:SS"
-                            ng-model="detail.finish_time"/>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-
-                  <li>
-                    <div class="item-content">
-                      <div class="item-inner"> 
+                    <div class="card-content">
+                      <div class="card-content-inner">
                         <p>
-                          <a
-                            class="button button-raised"
-                            xclass="button button-raised button-fill color-blue"
-                            ng-click="detail.finish_time = getTime()">
-                            <i class="icon icon-stopwatch"></i>
-                            &nbsp Stop
+                          <label>Čas na 10km:</label>
+                          <span>{{ detail.runner.time_on_10km }} min.</span>
+                        </p>
+                        <p>
+                          <label>Tel.:</label>
+                          <a href="tel:{{ detail.runner.tel }}">
+                            {{ formatTelNumber(detail.runner.tel) }}
                           </a>
                         </p>
+                      </div>
+                    </div>
+                  </div> -->
+
+                  <li>
+                    <div style="height: 32px;"></div>
+                  </li>
+                  <div class="card runner">
+                    <div class="item-content xcard-header">
+                      <div class="item-inner"> 
+                        <div class="item-title label">Bežec</div>
+                        <div class="item-input">
+                          <input type="text" placeholder="Zadaj meno" id="runner-autocomplete">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-content">
+                      <div class="card-content-inner">
+                        <p>
+                          <label>Čas na 10km:</label>
+                          <span>{{ detail.runner.time_on_10km }} min.</span>
+                        </p>
+                        <p>
+                          <label>Tel.:</label>
+                          <a href="tel:{{ detail.runner.tel }}">
+                            {{ formatTelNumber(detail.runner.tel) }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <li>
+                    <div class="item-content">
+                      <div class="item-inner">
+                        <div class="row">
+
+                          <div class="col-50">
+                            <div class="item-title label">Čas v cieli</div>
+                            <div class="item-input col-50">
+                              <input
+                                type="text"
+                                placeholder="HH:MM:SS"
+                                ng-model="detail.finish_time"/>
+                            </div>
+                          </div>
+
+                          <div class="col-50">
+                            <div style="height: 16px;"></div>
+                            <a
+                              class="button button-raised"
+                              ng-click="detail.finish_time = getTime()">
+                              <i class="icon icon-stopwatch"></i>
+                              &nbsp Stop
+                            </a>
+                          </div>
+
+                        </div>
                       </div>
                     </div>
                   </li>

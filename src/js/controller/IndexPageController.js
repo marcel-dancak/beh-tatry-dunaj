@@ -10,7 +10,6 @@ MyApp.angular.controller('IndexPageController', function ($scope, $http, $timeou
       if ($scope.sections) {
         $scope.updateSectionsList($scope.sections);
       }
-      //$scope.fetchData();
     }, 10);
   });
 

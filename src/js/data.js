@@ -4,62 +4,74 @@ window.DATA.runners = [
         id: 1,
         car: 1,
         name: "Katka",
-        time_on_10km: 65
+        time_on_10km: 65,
+        tel: "+420605030867"
     }, {
         id: 2,
         car: 1,
         name: "Jitka",
-        time_on_10km: 60
+        time_on_10km: 60,
+        tel: "+420604757513"
     }, {
         id: 3,
         car: 2,
         name: "Mato",
-        time_on_10km: 50
+        time_on_10km: 50,
+        tel: "+421904303201"
     }, {
         id: 4,
         car: 2,
         name: "Vlado",
-        time_on_10km: 46
+        time_on_10km: 46,
+        tel: "+421948049495"
     }, {
         id: 5,
         car: 2,
         name: "Peto",
-        time_on_10km: 60
+        time_on_10km: 60,
+        tel: "+421918464008"
     }, {
         id: 6,
         car: 2,
         name: "Marcel",
-        time_on_10km: 50
+        time_on_10km: 50,
+        tel: "+421948334748"
     }, {
         id: 7,
         car: 3,
         name: "Palo T.",
-        time_on_10km: 48
+        time_on_10km: 48,
+        tel: "+421905649405"
     }, {
         id: 8,
         car: 3,
         name: "Palo B.",
-        time_on_10km: 48
+        time_on_10km: 48,
+        tel: "+421950528252"
     }, {
         id: 9,
         car: 3,
         name: "Tibor",
-        time_on_10km: 52
+        time_on_10km: 52,
+        tel: "+421910186982"
     }, {
         id: 10,
         car: 3,
         name: "Marek",
-        time_on_10km: 52
+        time_on_10km: 52,
+        tel: "+421908396228"
     }, {
         id: 11,
         car: 1,
         name: "Patrik",
-        time_on_10km: 55
+        time_on_10km: 55,
+        tel: "+420736667706"
     }, {
         id: 12,
         car: 1,
         name: "Darina",
-        time_on_10km: 54
+        time_on_10km: 54,
+        tel: "+420602455600"
     }
 ];
 

@@ -6,8 +6,8 @@
 
   function AppController($scope, $q, $http) {
     // var SECTIONS_URL = 'https://api.myjson.com/bins/3w2k5';
-    // var SECTIONS_URL = 'https://api.myjson.com/bins/3epk5';
-    var SECTIONS_URL = 'data/sections_data.json';
+    var SECTIONS_URL = 'https://api.myjson.com/bins/3epk5';
+    // var SECTIONS_URL = 'data/sections_data.json';
 
     var runners = {};
     window.DATA.runners.forEach(function(runner) {
@@ -17,7 +17,7 @@
 
     $scope.loadState = function() {
       var startTime = localStorage.getItem('startTime');
-      // startTime = "09:00"
+      // startTime = "09:40"
       if (startTime) {
         startTime = moment(startTime, "HH:mm");
       } else {
@@ -74,7 +74,6 @@
       console.log('updateSectionsList: '+sections.length);
       sections.forEach(function(section) {
         // calculate expected run duration
-
         var expectedDuration = section.k * (section.length/10) * section.runner.time_on_10km;
         section.expectedDuration = expectedDuration.toFixed(2);
 
@@ -82,6 +81,10 @@
           var start = moment(prevSection.time, "HH:mm:ss");
           var end = moment(section.time, "HH:mm:ss");
           var duration = end.diff(start, 'seconds');
+          if (duration < 0) {
+            end.add(1, 'day');
+            duration = end.diff(start, 'seconds');
+          }
           section.duration = moment.duration(duration, "seconds").format("HH:mm:ss");
 
           // compare with expected duration
@@ -105,6 +108,14 @@
         }
         prevSection = section;
       });
+      var lastSection = sections[sections.length-1];
+      if (lastSection.time) {
+        $scope.finishTime = moment(lastSection.time, "HH:mm:ss");
+      } else {
+        $scope.finishTime = null;
+        $scope.expectedFinish = lastSection.expectedStart.clone().add(lastSection.expectedDuration, 'minute');
+      }
+
       $scope.filter = Math.max(-(sections.length-startIndex+1), -sections.length);
       $scope.filter = Math.min($scope.filter, -3); // show at least 3 items
     }
@@ -167,50 +178,28 @@
       $scope.detail.section = section;
       $scope.detail.runner = angular.copy(section.runner);
       $scope.detail.finish_time = section.time || "";
-      // history.pushState({page: "detail"}, "Detail", "/#detail");
       history.pushState({page: "detail"}, "Detail");
       MyApp.fw7.app.mainView.router.loadPage({pageName: 'detail'});
     };
 
     $scope.back = function(event) {
-      console.log('back');
       history.back();
     };
 
-    // history.pushState({page: 'index'}, "Index", "/#index");
     history.pushState({page: 'index'}, "Index");
     window.onpopstate = function(evt) {
       console.log(evt.state);
       if (evt.state && evt.state.page) {
         MyApp.fw7.app.mainView.router.back({pageName: evt.state.page});
-        // history.replaceState({page: null}, "");
-        // history.state.page = null;
-        // evt.state.page = null;
       } else {
-        console.log('exit');
+        // console.log('Close App');
         history.back();
       }
     }
 
     $scope.resetData = function() {
-      /*
-      function reset() {
-        $http.get('data/sections_data.json').then(function(response) {
-          $http.put(SECTIONS_URL, response.data).then(function() {
-            $scope.sections = null;
-
-            $scope.startTime = moment().minute(0).second(0);
-            $scope.pendingOperations = [];
-            $scope.saveState();
-            MyApp.fw7.app.pullToRefreshTrigger(Dom7('.pull-to-refresh-content'));
-          });
-        });
-      }
-      MyApp.fw7.app.confirm('Vymazať dáta?', 'Potvrdenie', reset);
-      */
 
       function newStart(startTime) {
-        console.log(startTime);
         startTime = moment(startTime, "HH:mm");
         if (!startTime.isValid()) {
           startTime = moment().minute(0).second(0);

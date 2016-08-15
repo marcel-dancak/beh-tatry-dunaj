@@ -3,6 +3,39 @@
 
   MyApp.angular
     .controller('AppController', AppController)
+    .directive('onLongPress', function($timeout) {
+      return {
+        restrict: 'A',
+        link: function($scope, $elm, $attrs) {
+          $elm.bind('touchstart', function(evt) {
+            // Locally scoped variable that will keep track of the long press
+            $scope.longPress = true;
+
+            // We'll set a timeout for 600 ms for a long press
+            $timeout(function() {
+              if ($scope.longPress) {
+                // If the touchend event hasn't fired,
+                // apply the function given in on the element's on-long-press attribute
+                $scope.$apply(function() {
+                  $scope.$eval($attrs.onLongPress)
+                });
+              }
+            }, 600);
+          });
+
+          $elm.bind('touchend', function(evt) {
+            // Prevent the onLongPress event from firing
+            $scope.longPress = false;
+            // If there is an on-touch-end function attached to this element, apply it
+            if ($attrs.onTouchEnd) {
+              $scope.$apply(function() {
+                $scope.$eval($attrs.onTouchEnd)
+              });
+            }
+          });
+        }
+      };
+    });
 
   function AppController($scope, $q, $http) {
     // var SECTIONS_URL = 'https://api.myjson.com/bins/3w2k5';
@@ -53,6 +86,8 @@
         }
         angular.merge(sections, window.DATA.sections_static);
         task.resolve(sections);
+      }, function() {
+        task.reject();
       });
       return task.promise;
     }
@@ -120,6 +155,24 @@
       $scope.filter = Math.min($scope.filter, -3); // show at least 3 items
     }
 
+    $scope.showNetworkErrorNotification = function(cssSelector) {
+      setTimeout(function() {
+
+        MyApp.fw7.app.addNotification({
+          message: 'Chyba pripojenia',
+          button: {
+            text: 'Skúsiť znova',
+            color: 'yellow',
+            close: true
+          },
+          additionalClass: 'network-error',
+          onClose: function () {
+            MyApp.fw7.app.pullToRefreshTrigger(cssSelector);
+          }
+        });
+      }, 400);
+    };
+
     $scope.fetchData = function() {
       console.log('fetchData');
       var task = $q.defer();
@@ -151,6 +204,8 @@
           $http.put(SECTIONS_URL, data).then(function() {
             $scope.pendingOperations = {};
             $scope.saveState();
+          }, function() {
+            $scope.showNetworkErrorNotification('.index.pull-to-refresh-content');
           });
         }
 
@@ -161,6 +216,10 @@
 
         $scope.sections = sections;
         task.resolve();
+      }, function() {
+        // handle error
+        $scope.showNetworkErrorNotification('.index.pull-to-refresh-content');
+        task.reject();
       });
 
       return task.promise;
@@ -214,7 +273,7 @@
             $scope.startTime = startTime;
             $scope.pendingOperations = [];
             $scope.saveState();
-            MyApp.fw7.app.pullToRefreshTrigger(Dom7('.pull-to-refresh-content'));
+            MyApp.fw7.app.pullToRefreshTrigger('.index.pull-to-refresh-content');
           });
         });
       }

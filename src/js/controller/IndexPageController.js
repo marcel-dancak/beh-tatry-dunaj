@@ -19,15 +19,19 @@ MyApp.angular.controller('IndexPageController', function ($scope, $http, $timeou
     MyApp.fw7.app.mainView.router.loadPage({pageName: 'resultsPage'});
   };
 
+  $scope.showMessages = function() {
+    history.pushState({page: "messages"}, "Messages");
+    MyApp.fw7.app.mainView.router.loadPage({pageName: 'messagesPage'});
+  };
+
   InitService.addEventListener('ready', function () {
     
-    var ptrContent = Dom7('.pull-to-refresh-content');
+    var ptrContent = Dom7('.index.pull-to-refresh-content');
     ptrContent.on('refresh', function(e) {
+      MyApp.fw7.app.closeNotification('.notification-item.network-error');
       $timeout(function () {
-        $scope.fetchData().then(function() {
-          setTimeout(function() {
-            MyApp.fw7.app.pullToRefreshDone();
-          }, 500);
+        $scope.fetchData().finally(function() {
+          MyApp.fw7.app.pullToRefreshDone();
         });
       });
     });

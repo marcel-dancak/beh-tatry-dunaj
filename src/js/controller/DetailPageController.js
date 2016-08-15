@@ -5,7 +5,7 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
   'use strict';
 
   $scope.getTime = function() {
-  	return moment().format("HH:mm:ss");
+    return moment().format("HH:mm:ss");
   };
 
   $scope.formatTelNumber = function(number) {
@@ -13,6 +13,10 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
       return number.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
     }
     return '';
+  };
+
+  $scope.callNumber = function(number) {
+    window.plugins.CallNumber.callNumber(angular.noop, angular.noop, number, false);
   };
 
   // DOM ready
@@ -23,7 +27,7 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
       runnersList.push($scope.runners[i]);
     }
     var autocompleteDropdownAll = MyApp.fw7.app.autocomplete({
-      input: '#runner-autocomplete',
+      input: '.runner-autocomplete',
       openIn: 'dropdown',
       textProperty: 'name',
       source: function (autocomplete, query, render) {
@@ -44,7 +48,7 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
 
     function onPageEntered(page) {
       // console.log('Detail page entered');
-      autocompleteDropdownAll.input.val($scope.detail.runner.name)
+      autocompleteDropdownAll.input.val($scope.detail.runner.name);
     }
     MyApp.fw7.app.onPageInit('detail', onPageEntered);
     MyApp.fw7.app.onPageReinit('detail', onPageEntered);
@@ -85,7 +89,7 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
         console.log('Change Detected');
         $scope.pendingOperations[$scope.detail.section.id] = sectionUpdate;
         $timeout(function() {
-          MyApp.fw7.app.pullToRefreshTrigger(Dom7('.pull-to-refresh-content'));
+          MyApp.fw7.app.pullToRefreshTrigger('.index.pull-to-refresh-content');
         }, 500);
       }
     });

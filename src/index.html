@@ -28,6 +28,7 @@
     <script type="text/javascript" src="js/controller/results.ctrl.js"></script>
     <script type="text/javascript" src="js/controller/IndexPageController.js"></script>
     <script type="text/javascript" src="js/controller/DetailPageController.js"></script>
+    <script type="text/javascript" src="js/controller/messages.ctrl.js"></script>
     
   </head>
   <body>
@@ -52,6 +53,10 @@
                   Štart: {{ startTime.format("HH:mm") }}
                 </div>
                 <div class="right">
+                  <a href="#" class="open-panel link icon-only"
+                    ng-click="showMessages()">
+                    <i class="icon icon-form-comment"></i>
+                  </a>
                   <a href="#" class="open-panel link icon-only"
                     ng-click="showResults()">
                     <i class="icon icon-results"></i>
@@ -142,12 +147,6 @@
                   </li>
 
                 </ul>
-                <!-- <div
-                  class="show-more"
-                  ng-hide="showMore"
-                  ng-click="showMore = true">
-                  <span>Zobraziť viac</span>
-                </div> -->
               </div>
 
             </div>
@@ -181,43 +180,15 @@
 
                 <ul>
 
-<!--                   <li class="label-item">
-                    <div class="item-content">
-                      <div class="item-inner"> 
-                        <div class="item-title label">Bežec</div>
-                      </div>
-                    </div>
-                  </li>
-
-                  <div class="card runner">
-                    <div class="card-header">
-                      <input type="text" placeholder="Zadaj meno" id="runner-autocomplete">
-                    </div>
-                    <div class="card-content">
-                      <div class="card-content-inner">
-                        <p>
-                          <label>Čas na 10km:</label>
-                          <span>{{ detail.runner.time_on_10km }} min.</span>
-                        </p>
-                        <p>
-                          <label>Tel.:</label>
-                          <a href="tel:{{ detail.runner.tel }}">
-                            {{ formatTelNumber(detail.runner.tel) }}
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                  </div> -->
-
                   <li>
                     <div style="height: 32px;"></div>
                   </li>
                   <div class="card runner">
-                    <div class="item-content xcard-header">
+                    <div class="item-content">
                       <div class="item-inner"> 
                         <div class="item-title label">Bežec</div>
                         <div class="item-input">
-                          <input type="text" placeholder="Zadaj meno" id="runner-autocomplete">
+                          <input type="text" placeholder="Zadaj meno" class="runner-autocomplete">
                         </div>
                       </div>
                     </div>
@@ -228,8 +199,8 @@
                           <span>{{ detail.runner.time_on_10km }} min.</span>
                         </p>
                         <p>
-                          <label>Tel.:</label>
-                          <a href="tel:{{ detail.runner.tel }}">
+                          <label>Tel. číslo:</label>
+                          <a ng-href="tel:{{ detail.runner.tel }}">
                             {{ formatTelNumber(detail.runner.tel) }}
                           </a>
                         </p>
@@ -256,7 +227,10 @@
                             <div style="height: 16px;"></div>
                             <a
                               class="button button-raised"
-                              ng-click="detail.finish_time = getTime()">
+                              ng-click="
+                                detail.finish_time = getTime();
+                                back($event);
+                              ">
                               <i class="icon icon-stopwatch"></i>
                               &nbsp Stop
                             </a>
@@ -329,8 +303,46 @@
             </div>
           </div>
 
+          <!-- Page 4 -->
+          <div
+            class="page cached"
+            data-page="messagesPage"
+            ng-controller="MessagesController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a ng-click="back($event);$event.stopPropagation()" class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Správy</div>
+                <div class="right">
+                  <a ng-click="promptUserName()" href="#" class="link open-info">{{ userName }}</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- messagebar -->
+            <div class="toolbar messagebar">
+              <div class="toolbar-inner">
+                <textarea placeholder="Text"></textarea>
+                <a ng-click="sendMessage()" href="#" class="link">Odoslať</a>
+              </div>
+            </div>
+
+            <div class="page-content messages-content pull-to-refresh-content">
+              <div class="pull-to-refresh-layer">
+                <div class="preloader"></div>
+                <div class="pull-to-refresh-arrow"></div>
+              </div>
+
+              <div class="messages"></div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
+
   </body>
 </html>

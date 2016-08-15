@@ -199,6 +199,7 @@
   top: 2px;
 }
 
+
 /**
  * Detail
  */
@@ -277,9 +278,24 @@ li.label-item .item-content {
   color: #777;
 }
 
+/**
+ * Messages
+ */
+
+.messages-date {
+  margin: 0;
+  max-height: 0px;
+  line-height: 25px;
+}
+
+
  /**
   *  Icons
   */
+i.icon.icon-form-comment {
+  background-image: url("./comment.svg");
+}
+
 i.icon.icon-stopwatch {
   background-image: url("./stopwatch.svg");
   height: 24px;

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html ng-app="MyApp">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <title>Od Tatier k Dunaju</title>
+    
+    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="styles/styles.min.css">
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/app.min.js"></script>
+    
+  </head>
+  <body>
+    <div class="statusbar-overlay"></div>
+    <div class="panel-overlay"></div>
+    <div class="views">
+      <div class="view view-main" ng-controller="AppController">
+        
+        <!-- Pages -->
+        <div class="pages navbar-fixed">
+          
+          <!-- Page 1 -->
+          <div
+            class="page"
+            data-page="index"
+            ng-controller="IndexPageController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div
+                  class="center"
+                  ng-click="resetData()">
+                  Štart: {{ startTime.format("HH:mm") }}
+                </div>
+                <div class="right">
+                  <a href="#" class="open-panel link icon-only"
+                    ng-click="showMessages()">
+                    <i class="icon icon-form-comment"></i>
+                  </a>
+                  <a href="#" class="open-panel link icon-only"
+                    ng-click="showResults()">
+                    <i class="icon icon-results"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div
+              class="index page-content pull-to-refresh-content">
+              <!-- Default pull to refresh layer-->
+              <div class="pull-to-refresh-layer">
+                <div class="preloader"></div>
+                <div class="pull-to-refresh-arrow"></div>
+              </div>
+           
+              <!-- usual content below -->
+              <div class="list-block media-list sections">
+                <ul ng-cloak>
+                  <li
+                    ng-repeat="section in sections | limitTo: filter track by section.id"
+                    class="item-content car-{{ section.runner.car }}"
+                    ng-class="{active: runningSectionId === section.id}"
+                    ng-click="detailPage(section)"
+                    ng-disabled="section.time">
+                    <div class="item-section">
+                      {{ ::section.id }}
+                    </div>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div class="item-title">
+                          {{ section.runner.name }}
+                          <span class="from">({{ ::section.from }})</span>
+                        </div>
+                      </div>
+                      <div class="item-subtitle">
+                        {{ ::section.length }}km / +{{ ::section.elevation_up }}m -{{ ::section.elevation_down }}m
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <span
+                        class="finish-time"
+                        ng-if="section.time">
+                        {{ section.time }}
+                      </span>
+                      <p
+                        class="running-time"
+                        ng-if="runningSectionId === section.id && !section.time">
+                        <span>Beží</span>
+                        <span>{{ runningSectionTime }}</span>
+                      </p>
+                      <span
+                        class="start-time"
+                        ng-if="section.expectedStart && runningSectionId !== section.id && !section.time">
+                        Štart: {{ section.expectedStart.format('HH:mm') }}
+                      </span>
+                    </div>
+                    <p
+                      ng-if="!section.time"
+                      class="expected-duration">
+                      / {{ section.expectedDuration }} min.
+                    </p>
+                  </li>
+
+                  <li
+                    ng-if="::sections"
+                    class="item-content finish"
+                    ng-class="{active: finishTime}">
+                    <img src="styles/tatry-dunaj.png" class="background"></img>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div></div>
+                        <div class="title">
+                          <span
+                            ng-if="!finishTime"
+                            class="expected-finish-time">
+                            Odhadovaný príchod: {{ expectedFinish.format('HH:mm') }}
+                          </span>
+                          <span
+                            ng-if="finishTime"
+                            class="final-finish-time">
+                            {{ finishTime.format('HH:mm:ss') }}
+                          </span>
+                        </div>
+                        <div></div>
+                      </div>
+                    </div>
+                  </li>
+
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Page 2 -->
+          <div
+            class="page cached"
+            data-page="detail"
+            ng-controller="DetailPageController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a
+                    ng-click="back($event);$event.stopPropagation()"
+                    class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Úsek č.{{ detail.section.id }}</div>
+                <div class="right">
+                  <!-- <a href="#" class="open-panel link icon-only">
+                    <i class="icon icon-bars"></i>
+                  </a> -->
+                </div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div class="page-content">
+              <div class="list-block inputs-list">
+
+                <ul>
+
+                  <li>
+                    <div style="height: 32px;"></div>
+                  </li>
+                  <div class="card runner">
+                    <div class="item-content">
+                      <div class="item-inner"> 
+                        <div class="item-title label">Bežec</div>
+                        <div class="item-input">
+                          <input type="text" placeholder="Zadaj meno" class="runner-autocomplete">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-content">
+                      <div class="card-content-inner">
+                        <p>
+                          <label>Čas na 10km:</label>
+                          <span>{{ detail.runner.time_on_10km }} min.</span>
+                        </p>
+                        <p>
+                          <label>Tel. číslo:</label>
+                          <a ng-href="tel:{{ detail.runner.tel }}">
+                            {{ formatTelNumber(detail.runner.tel) }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <li>
+                    <div class="item-content">
+                      <div class="item-inner">
+                        <div class="row">
+
+                          <div class="col-50">
+                            <div class="item-title label">Čas v cieli</div>
+                            <div class="item-input col-50">
+                              <input
+                                type="text"
+                                placeholder="HH:MM:SS"
+                                ng-model="detail.finish_time"/>
+                            </div>
+                          </div>
+
+                          <div class="col-50">
+                            <div style="height: 16px;"></div>
+                            <a
+                              class="button button-raised"
+                              ng-click="
+                                detail.finish_time = getTime();
+                                back($event);
+                              ">
+                              <i class="icon icon-stopwatch"></i>
+                              &nbsp Stop
+                            </a>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Page 3 -->
+          <div
+            class="page cached"
+            data-page="resultsPage"
+            ng-controller="ResultsController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a ng-click="back($event);$event.stopPropagation()" class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Výsledky</div>
+                <div class="right"></div>
+              </div>
+            </div>
+            <!-- Page content-->
+            <div class="page-content">
+              <div class="list-block media-list sections results">
+                <ul ng-cloak>
+                  <li
+                    ng-repeat="section in sections track by section.id"
+                    ng-if="section.time"
+                    class="item-content car-{{ ::section.runner.car }}"
+                    ng-click="detailPage(section)">
+                    <div class="item-section">
+                      {{ ::section.id }}
+                    </div>
+                    <div class="item-inner">
+                      <div class="item-title-row">
+                        <div class="item-title">
+                          {{ ::section.runner.name }}
+                        </div>
+                      </div>
+                      <div class="item-subtitle">
+                        {{ ::section.length }}km (+{{ ::section.elevation_up }}m, -{{ ::section.elevation_down }}m)
+                      </div>
+                    </div>
+                    <div class="item-right">
+                      <p class="finish-time"><span>({{ section.time }})</span></p>
+                      <p class="duration-info">
+                        <!-- <label>Čas:</label> -->
+                        <span class="duration">{{ section.duration }}</span>
+                        <span
+                          class="comparison"
+                          ng-class="{negative: section.comparison[0] === '-'}">
+                          /{{ section.comparison }}
+                        </span>
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page 4 -->
+          <div
+            class="page cached"
+            data-page="messagesPage"
+            ng-controller="MessagesController">
+            <div class="navbar">
+              <div class="navbar-inner">
+                <div class="left">
+                  <a ng-click="back($event);$event.stopPropagation()" class="back link icon-only">
+                    <i class="icon icon-back"></i>
+                  </a>
+                </div>
+                <div class="center">Správy</div>
+                <div class="right">
+                  <a ng-click="promptUserName()" href="#" class="link open-info">{{ userName }}</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- messagebar -->
+            <div class="toolbar messagebar">
+              <div class="toolbar-inner">
+                <textarea placeholder="Text"></textarea>
+                <a ng-click="sendMessage()" href="#" class="link">Odoslať</a>
+              </div>
+            </div>
+
+            <div class="page-content messages-content pull-to-refresh-content">
+              <div class="pull-to-refresh-layer">
+                <div class="preloader"></div>
+                <div class="pull-to-refresh-arrow"></div>
+              </div>
+
+              <div class="messages"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

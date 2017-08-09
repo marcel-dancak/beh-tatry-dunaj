@@ -3,6 +3,11 @@
 
   MyApp.angular
     .controller('AppController', AppController)
+    .constant('Config', {
+      SECTIONS_URL: 'https://api.myjson.com/bins/3w2k5',
+      // SECTIONS_URL: 'https://api.myjson.com/bins/3epk5',
+      MESSAGES_URL: 'https://api.myjson.com/bins/1hte1'
+    })
     .directive('onLongPress', function($timeout) {
       return {
         restrict: 'A',
@@ -37,10 +42,7 @@
       };
     });
 
-  function AppController($scope, $q, $http) {
-    // var SECTIONS_URL = 'https://api.myjson.com/bins/3w2k5';
-    var SECTIONS_URL = 'https://api.myjson.com/bins/3epk5';
-    // var SECTIONS_URL = 'data/sections_data.json';
+  function AppController($scope, $q, $http, Config) {
 
     var runners = {};
     window.DATA.runners.forEach(function(runner) {
@@ -75,7 +77,7 @@
 
     function getSections() {
       var task = $q.defer();
-      $http.get(SECTIONS_URL).then(function(response) {
+      $http.get(Config.SECTIONS_URL).then(function(response) {
         var sections = response.data.sections;
         // check/update startTime
         if (response.data.start) {
@@ -174,22 +176,41 @@
     };
 
     $scope.fetchData = function() {
-      console.log('fetchData');
       var task = $q.defer();
 
       getSections().then(function(sections) {
         if ($scope.pendingOperations) {
-          console.log('Merge and Upload new sections');
-          console.log($scope.pendingOperations);
+          // console.log('Merge and Upload new sections');
+          // console.log($scope.pendingOperations);
           $scope.saveState();
+          // console.log(JSON.stringify(sections))
+          localStorage.setItem('sections-backup', JSON.stringify(sections));
 
+          var overrideError = false;
           for (var sectionId in $scope.pendingOperations) {
             var section = sections[sectionId-1];
             var diff = $scope.pendingOperations[sectionId];
             for (var key in diff) {
-              section[key] = diff[key].new;
+              // console.log('checking: '+section[key]+' vs: '+diff[key].old);
+              // check if record wasn't changed in the meantime
+              if (section[key] === diff[key].old) {
+                section[key] = diff[key].new;
+              } else {
+                overrideError = true;
+              }
             }
           }
+          if (overrideError) {
+            MyApp.fw7.app.addNotification({
+              message: 'Nastala kolízia s inými zmenami, niektore údaje neboli uložené.',
+              button: {
+                text: 'Zatvoriť',
+                color: 'yellow',
+                close: true
+              }
+            });
+          }
+
           var json = JSON.stringify(sections, function(key, value) {
             if (key === '' || key === 'id' || key === 'runner' || key === 'time' || Number.isInteger(parseInt(key))) {
               return value;
@@ -200,8 +221,8 @@
             sections: JSON.parse(json),
             start: $scope.startTime.format("HH:mm")
           }
-          console.log(data);
-          $http.put(SECTIONS_URL, data).then(function() {
+          // console.log(data);
+          $http.put(Config.SECTIONS_URL, data).then(function() {
             $scope.pendingOperations = {};
             $scope.saveState();
           }, function() {
@@ -218,6 +239,13 @@
         task.resolve();
       }, function() {
         // handle error
+        if (!$scope.sections) {
+          // TODO recover from backup
+          var backup = localStorage.getItem('sections-backup');
+          if (backup) {
+            var sections = JSON.parse(backup);
+          }
+        }
         $scope.showNetworkErrorNotification('.index.pull-to-refresh-content');
         task.reject();
       });
@@ -263,21 +291,24 @@
         if (!startTime.isValid()) {
           startTime = moment().minute(0).second(0);
         };
-
-        $http.get('data/sections_data.json').then(function(response) {
-          var data = {
-            sections: response.data.sections,
-            start: startTime.format("HH:mm")
-          }
-          $http.put(SECTIONS_URL, data).then(function() {
-            $scope.startTime = startTime;
-            $scope.pendingOperations = [];
-            $scope.saveState();
-            MyApp.fw7.app.pullToRefreshTrigger('.index.pull-to-refresh-content');
-          });
+        var data = {
+          sections: window.DATA.sections_empty,
+          start: startTime.format("HH:mm")
+        }
+        $http.put(Config.SECTIONS_URL, data).then(function() {
+          $scope.startTime = startTime;
+          $scope.pendingOperations = [];
+          $scope.saveState();
+          MyApp.fw7.app.pullToRefreshTrigger('.index.pull-to-refresh-content');
+          $http.put(Config.MESSAGES_URL, []);
         });
       }
-      MyApp.fw7.app.prompt('Nastaviť čas štartu (HH:MM)', 'Nové meranie', newStart);
+      var checkCode = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+      MyApp.fw7.app.prompt('Zadaj kód: '+checkCode, 'Kontrola', function(value) {
+        if (value === checkCode) {
+          MyApp.fw7.app.prompt('Nastaviť čas štartu (HH:MM)', 'Nové meranie', newStart);
+        }
+      });
     };
   }
 

@@ -9,9 +9,9 @@ window.DATA.runners = [
     }, {
         id: 2,
         car: 1,
-        name: "Jitka",
-        time_on_10km: 60,
-        tel: "+420604757513"
+        name: "Jirka",
+        time_on_10km: 65,
+        tel: "+420731108383"
     }, {
         id: 3,
         car: 2,
@@ -63,9 +63,9 @@ window.DATA.runners = [
     }, {
         id: 11,
         car: 1,
-        name: "Patrik",
-        time_on_10km: 55,
-        tel: "+420736667706"
+        name: "Miroslav",
+        time_on_10km: 60,
+        tel: "+420733646511"
     }, {
         id: 12,
         car: 1,
@@ -302,18 +302,18 @@ window.DATA.sections_static = [
         from: "Veľký Lég"
     }, {
         id: 33,
-        length: 7.9,
+        length: 7.5,
         elevation_up: 10,
         elevation_down: 10,
-        k: 1.08228,
+        k: 1.0826,
         from: "Čukárska Paka"
     }, {
         id: 34,
-        length: 8.4,
+        length: 7.4,
         elevation_up: 20,
         elevation_down: 20,
-        k: 1.093,
-        from: "Čilistov"
+        k: 1.092,
+        from: "Šamorín"
     }, {
         id: 35,
         length: 11.3,
@@ -328,5 +328,116 @@ window.DATA.sections_static = [
         elevation_down: 50,
         k: 1.099,
         from: "Jamaica  (BA hrádza)"
+    }
+];
+window.DATA.sections_empty = [
+    {
+        "id": 1,
+        "runner": 1
+    }, {
+        "id": 2,
+        "runner": 2
+    }, {
+        "id": 3,
+        "runner": 3
+    }, {
+        "id": 4,
+        "runner": 4
+    }, {
+        "id": 5,
+        "runner": 5
+    }, {
+        "id": 6,
+        "runner": 6
+    }, {
+        "id": 7,
+        "runner": 7
+    }, {
+        "id": 8,
+        "runner": 8
+    }, {
+        "id": 9,
+        "runner": 9
+    }, {
+        "id": 10,
+        "runner": 10
+    }, {
+        "id": 11,
+        "runner": 11
+    }, {
+        "id": 12,
+        "runner": 12
+    }, {
+        "id": 13,
+        "runner": 1
+    }, {
+        "id": 14,
+        "runner": 2
+    }, {
+        "id": 15,
+        "runner": 3
+    }, {
+        "id": 16,
+        "runner": 4
+    }, {
+        "id": 17,
+        "runner": 5
+    }, {
+        "id": 18,
+        "runner": 6
+    }, {
+        "id": 19,
+        "runner": 7
+    }, {
+        "id": 20,
+        "runner": 8
+    }, {
+        "id": 21,
+        "runner": 9
+    }, {
+        "id": 22,
+        "runner": 10
+    }, {
+        "id": 23,
+        "runner": 11
+    }, {
+        "id": 24,
+        "runner": 12
+    }, {
+        "id": 25,
+        "runner": 1
+    }, {
+        "id": 26,
+        "runner": 2
+    }, {
+        "id": 27,
+        "runner": 3
+    }, {
+        "id": 28,
+        "runner": 4
+    }, {
+        "id": 29,
+        "runner": 5
+    }, {
+        "id": 30,
+        "runner": 6
+    }, {
+        "id": 31,
+        "runner": 7
+    }, {
+        "id": 32,
+        "runner": 8
+    }, {
+        "id": 33,
+        "runner": 9
+    }, {
+        "id": 34,
+        "runner": 10
+    }, {
+        "id": 35,
+        "runner": 11
+    }, {
+        "id": 36,
+        "runner": 12
     }
 ];

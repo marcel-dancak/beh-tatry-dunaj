@@ -1,10 +1,9 @@
 /*jslint browser: true*/
 /*global console, MyApp*/
 
-MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $http, InitService) {
+MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $http, InitService, Config) {
   'use strict';
 
-  var MESSAGES_URL = 'https://api.myjson.com/bins/1hte1';
   var messageBar;
   var messenger;
 
@@ -35,7 +34,7 @@ MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $
     if (!text) {
       return;
     }
-    $http.get(MESSAGES_URL).then(function(resp) {
+    $http.get(Config.MESSAGES_URL).then(function(resp) {
       var messages = resp.data;
       var name = localStorage.getItem('name') || '';
       var message = {
@@ -46,7 +45,7 @@ MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $
       };
       
       messages.push(message);
-      $http.put(MESSAGES_URL, messages).then(function() {
+      $http.put(Config.MESSAGES_URL, messages).then(function() {
         messenger.addMessage(message);
         messageBar.value('');
       });
@@ -55,7 +54,7 @@ MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $
 
   function loadMessages() {
     var task = $q.defer();
-    $http.get(MESSAGES_URL).then(function(resp) {
+    $http.get(Config.MESSAGES_URL).then(function(resp) {
       var messages = resp.data.reverse();
       var name = localStorage.getItem('name') || '';
       messages.forEach(function(message, index) {
@@ -90,9 +89,7 @@ MyApp.angular.controller('MessagesController', function ($scope, $q, $timeout, $
             $scope.showNetworkErrorNotification('.messages-content.pull-to-refresh-content');
           });
           promise.finally(function() {
-            // setTimeout(function() {
-              MyApp.fw7.app.pullToRefreshDone();
-            // }, 500);
+            MyApp.fw7.app.pullToRefreshDone();
           });
         });
       });

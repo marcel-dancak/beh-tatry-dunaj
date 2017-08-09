@@ -69,17 +69,20 @@ MyApp.angular.controller('DetailPageController', function ($scope, $timeout, Ini
         finishTime = "";
       }
 
+      var pendingSectionState = $scope.pendingOperations[$scope.detail.section.id] || {};
       if (finishTime !== ($scope.detail.section.time || "")) {
+        var oldValue = angular.isDefined(pendingSectionState.time)? pendingSectionState.time : $scope.detail.section.time;
         sectionUpdate.time = {
-          'old': $scope.detail.section.time,
+          'old': oldValue,
           'new': finishTime
         };
         $scope.detail.section.time = finishTime;
       }
     
       if ($scope.detail.runner.id !== $scope.detail.section.runner.id) {
+        var oldValue = angular.isDefined(pendingSectionState.runner)? pendingSectionState.runner : $scope.detail.section.runner.id;
         sectionUpdate.runner = {
-          'old': $scope.detail.section.runner.id,
+          'old': oldValue,
           'new': $scope.detail.runner.id
         };
 
